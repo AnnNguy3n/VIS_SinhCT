@@ -48,3 +48,22 @@ trong đó:
 * Khi measurement_method là 2 hoặc 3, cần bổ sung đối số diff_p_p_lim, quy định mức độ chênh lệch tối thiểu giữa profit và profit_limit của công thức được lưu.
 
 # Chạy sinh công thức
+<pre><code>```
+vis.generate_formula(
+    path: str,
+    num_f_per_file: int=1000,
+    num_f_target: int=1000000)
+```
+</code></pre>
+
+trong đó:
+* path: đường dẫn lưu công thức được sinh ra
+* num_f_per_file: Số công thức tối đa trong một file lưu
+* num_f_target: Số công thức tối đa được sinh ra trong một lần chạy
+
+# Lưu lịch sử
+Trong trường hợp ngắt quá trình chạy bằng tay (KeyboardInterrupt) thì cần chạy hàm lưu lịch sử:
+<pre><code>```
+vis.save_history()
+```
+</code></pre>
