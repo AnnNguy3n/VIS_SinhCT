@@ -1,5 +1,5 @@
 # Khởi tạo một object Formula_generator
-<code>```
+<pre><code>```
 from generator import Formula_generator
 vis = Formula_generator(
     data: pd.DataFrame,
@@ -12,7 +12,7 @@ vis = Formula_generator(
     target: float = 1.0
 )
 ```
-</code>
+</code></pre>
 
 trong đó:
 * data
