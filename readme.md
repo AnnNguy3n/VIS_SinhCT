@@ -1,5 +1,6 @@
 # Khởi tạo một object Formula_generator
-`*` from generator import Formula_generator
+<pre><code>```python
+from generator import Formula_generator
 vis = Formula_generator(
     data: pd.DataFrame,
     generation_method: int = 0,
@@ -10,6 +11,8 @@ vis = Formula_generator(
     measurement_method: int = 0,
     target: float = 1.0
 )
+```
+</code></pre>
 
 trong đó:
 * data
