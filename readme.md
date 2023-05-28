@@ -1,5 +1,5 @@
 # Khởi tạo một object Formula_generator
-<pre><code>```python
+<pre><code>```
 from generator import Formula_generator
 vis = Formula_generator(
     data: pd.DataFrame,
