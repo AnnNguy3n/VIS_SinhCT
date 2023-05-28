@@ -1,5 +1,5 @@
 # Khởi tạo một object Formula_generator
-from generator import Formula_generator
+`*` from generator import Formula_generator
 vis = Formula_generator(
     data: pd.DataFrame,
     generation_method: int = 0,
@@ -43,3 +43,5 @@ trong đó:
 * Khi investment_method là 1, cần bổ sung đối số max_loop, quy định số lần lặp tối đa để tìm ngưỡng tối ưu cho công thức.
 
 * Khi measurement_method là 2 hoặc 3, cần bổ sung đối số diff_p_p_lim, quy định mức độ chênh lệch tối thiểu giữa profit và profit_limit của công thức được lưu.
+
+# Chạy sinh công thức
