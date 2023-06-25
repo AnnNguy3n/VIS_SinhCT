@@ -1,4 +1,3 @@
-import pandas as pd
 from base import *
 
 
@@ -25,7 +24,7 @@ MEASUREMENT_METHODS = {
 }
 
 
-class Formula_generator(Base):
+class Generator(Base):
     def __init__(self,
                  data: pd.DataFrame,
                  generation_method: int = 0,
@@ -43,7 +42,7 @@ class Formula_generator(Base):
         if generation_method not in GENERATION_METHODS:
             raise Exception(f"Hiện chưa có cách sinh {generation_method}")
 
-        self.generation_method = getattr(self, f"_Formula_generator__generation_method_{generation_method}")
+        self.generation_method = getattr(self, f"_Generator__generation_method_{generation_method}")
 
         # Check required fields
         self.required_fields = np.zeros(len(required_fields), np.int64)
@@ -65,7 +64,7 @@ class Formula_generator(Base):
         if investment_method not in INVESTMENT_METHODS:
             raise Exception(f"Hiện chưa có cách đầu tư {investment_method}")
 
-        self.investment_method = getattr(self, f"_Formula_generator__investment_method_{investment_method}")
+        self.investment_method = getattr(self, f"_Generator__investment_method_{investment_method}")
 
         #
         self.interest_rate = interest_rate
@@ -74,7 +73,7 @@ class Formula_generator(Base):
         if measurement_method not in MEASUREMENT_METHODS:
             raise Exception(f"Hiện chưa có cách đánh giá {measurement_method}")
 
-        self.measurement_method = getattr(self, f"_Formula_generator__measurement_method_{measurement_method}")
+        self.measurement_method = getattr(self, f"_Generator__measurement_method_{measurement_method}")
 
         #
         self.target = target
@@ -83,7 +82,7 @@ class Formula_generator(Base):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
-    def generate_formula(self, path: str, num_f_per_file: int=1000, num_f_target: int=1000000):
+    def generate(self, path: str, num_f_per_file: int=1000, num_f_target: int=1000000):
         if not path.endswith("/") and not path.endswith("\\"):
             path += "/"
 
@@ -541,10 +540,10 @@ class Formula_generator(Base):
             reason = 0
             for i in range(INDEX.shape[0]-2):
                 inv_cyc_val = weight[INDEX[-i-3]:INDEX[-i-2]]
-                inv_cyc_sym = self.data.iloc[self.INDEX[-i-3]:self.INDEX[-i-2]]["SYMBOL"].reset_index(drop=True)
+                inv_cyc_sym = self.SYMBOL[self.INDEX[-i-3]:self.INDEX[-i-2]]
                 if reason == 0: # Không đầu tư do không có công ty nào vượt ngưỡng 2 năm liền
                     pre_cyc_val = weight[INDEX[-i-2]:INDEX[-i-1]]
-                    pre_cyc_sym = self.data.iloc[self.INDEX[-i-2]:self.INDEX[-i-1]]["SYMBOL"].reset_index(drop=True)
+                    pre_cyc_sym = self.SYMBOL[self.INDEX[-i-2]:self.INDEX[-i-1]]
                     a = np.where(pre_cyc_val > threshold)[0]
                     b = np.where(inv_cyc_val > threshold)[0]
                     coms = np.intersect1d(pre_cyc_sym[a], inv_cyc_sym[b])
@@ -559,7 +558,7 @@ class Formula_generator(Base):
                     if reason == 0 and b.shape[0] == 0:
                         reason = 1
                 else:
-                    index = np.where(inv_cyc_sym.isin(coms))
+                    index = np.where(np.isin(inv_cyc_sym, coms, True))
                     value = weight[INDEX[-i-3]:INDEX[-i-2]][index]
                     profit = self.PROFIT[self.INDEX[-i-3]:self.INDEX[-i-2]][index]
                     index += INDEX[-i-3]
@@ -599,6 +598,6 @@ class Formula_generator(Base):
             f_profit = func.harmean(profits[:-1])
             if f_profit < self.target:
                 return f_profit, False
-            
+
             max_profit = func.measurement_method_3(indexes, values, profits, self.interest_rate, f_profit)
             return f_profit, max_profit - f_profit >= self.diff_p_p_lim

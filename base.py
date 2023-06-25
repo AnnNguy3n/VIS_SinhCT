@@ -59,6 +59,11 @@ class Base:
         self.operand_name = {i:operand_name[i] for i in range(len(operand_name))}
         self.OPERAND = np.transpose(np.array(operand_data, dtype=np.float64))
 
+        symbol_name = data["SYMBOL"].unique()
+        self.symbol_name = {symbol_name[i]:i for i in range(len(symbol_name))}
+        self.SYMBOL = np.array([self.symbol_name[s] for s in data["SYMBOL"]])
+        self.symbol_name = {v:k for k,v in self.symbol_name.items()}
+
         # Thuộc tính bổ sung cho các phương thức
         self.__string_operator = "+-*/"
 
