@@ -558,7 +558,7 @@ class Generator(Base):
                     if reason == 0 and b.shape[0] == 0:
                         reason = 1
                 else:
-                    index = np.where(np.isin(inv_cyc_sym, coms, True))
+                    index = np.where(np.isin(inv_cyc_sym, coms, True))[0]
                     value = weight[INDEX[-i-3]:INDEX[-i-2]][index]
                     profit = self.PROFIT[self.INDEX[-i-3]:self.INDEX[-i-2]][index]
                     index += INDEX[-i-3]
