@@ -13,6 +13,7 @@ INVESTMENT_METHODS = {
     1: '''Đầu tư các công ty có value của năm đầu tư và năm trước đó đều vượt ngưỡng cho
           trước. Hoặc, đầu tư tất cả các công ty vượt ngưỡng nếu năm trước đó không có công
           ty nào vượt ngưỡng. Các trường hợp khác không đầu tư.''',
+    2: '''Không làm gì cả, trả ra arr_index là INDEX (đã cắt theo năm), arr_value là None, arr_profit là PROFIT (đã cắt theo năm).'''
 }
 
 
@@ -21,6 +22,7 @@ MEASUREMENT_METHODS = {
     1: "Harmean",
     2: "Geomean và độ chênh lệch giữa geomean và geo_limit",
     3: "Harmean và độ chênh lệch giữa harmean và har_limit",
+    4: "Tỉ lệ countTrue (số lần mà cty này có value > cty kia, profit của cty đó cũng > cty kia) chia cho countFalse"
 }
 
 
@@ -329,7 +331,10 @@ class Generator(Base):
                         self.list_f.append(self.convert_arrF_to_strF(formulas[w_i]))
                         self.list_f_pro.append(f_profit)
                         self.list_inv_cyc.append(self.__last_cyc - c_i)
-                        if type(indexes[0]) == int or type(indexes[0]) == np.int64:
+                        if self.measurement_method == self.__measurement_method_4:
+                            t, f = func._countTrueFalse(weight[indexes[0]:indexes[1]], profits[indexes[0]:indexes[1]])
+                            self.list_inv_pro.append(t / (f + 1e-6))
+                        elif type(indexes[0]) == int or type(indexes[0]) == np.int64:
                             self.list_inv_pro.append(profits[-1])
                         elif type(indexes[0]) == list or type(indexes[0]) == np.ndarray:
                             self.list_inv_pro.append(np.mean(profits[-1]))
@@ -343,7 +348,10 @@ class Generator(Base):
                     self.list_f.append(self.convert_arrF_to_strF(formulas[w_i]))
                     self.list_f_pro.append(f_profit)
                     self.list_inv_cyc.append(self.__last_cyc)
-                    if type(indexes[0]) == int or type(indexes[0]) == np.int64:
+                    if self.measurement_method == self.__measurement_method_4:
+                        t, f = func._countTrueFalse(weights[w_i][indexes[0]:indexes[1]], profits[indexes[0]:indexes[1]])
+                        self.list_inv_pro.append(t / (f + 1e-6))
+                    elif type(indexes[0]) == int or type(indexes[0]) == np.int64:
                         self.list_inv_pro.append(profits[-1])
                     elif type(indexes[0]) == list or type(indexes[0]) == np.ndarray:
                         self.list_inv_pro.append(np.mean(profits[-1]))
@@ -584,6 +592,11 @@ class Generator(Base):
 
         return list_index, list_value, list_profit
 
+    def __investment_method_2(self, weight, c_i):
+        INDEX = self.INDEX[c_i:] - self.INDEX[c_i]
+        PROFIT = self.PROFIT[self.INDEX[c_i]:]
+        return INDEX, None, PROFIT
+
     def __measurement_method_2(self, weight, indexes, values, profits):
         if type(indexes[0]) == int or type(indexes[0]) == np.int64:
             f_profit = np.prod(profits[:-1])**(1.0/(len(profits) - 1))
@@ -601,3 +614,7 @@ class Generator(Base):
 
             max_profit = func.measurement_method_3(indexes, values, profits, self.interest_rate, f_profit)
             return f_profit, max_profit - f_profit >= self.diff_p_p_lim
+
+    def __measurement_method_4(self, weight, index, value, profit):
+        ratio = func.countTrueFalse(weight, profit, index)
+        return ratio, ratio >= self.target

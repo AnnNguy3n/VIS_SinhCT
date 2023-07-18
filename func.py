@@ -229,3 +229,33 @@ def measurement_method_3(indexes, values, profits, interest_rate, f_profit):
             max_profit = har_
 
     return max_profit
+
+
+@njit
+def _countTrueFalse(a, b):
+    countTrue = 0
+    countFalse = 0
+    len_ = len(a)
+    for i in range(len_ - 1):
+        for j in range(i+1, len_):
+            if a[i] == a[j] and b[i] == b[j]:
+                countTrue += 1
+            else:
+                if (a[i] - a[j]) * (b[i] - b[j]) > 0:
+                    countTrue += 1
+                else:
+                    countFalse += 1
+
+    return countTrue, countFalse
+
+
+@njit
+def countTrueFalse(a, b, index):
+    countTrue = 0
+    countFalse = 0
+    for i in range(1, index.shape[0] - 1):
+        t, f = _countTrueFalse(a[index[i]:index[i+1]], b[index[i]:index[i+1]])
+        countTrue += t
+        countFalse += f
+
+    return countTrue / (countFalse + 1e-6)
