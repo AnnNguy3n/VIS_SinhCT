@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+from numba.typed import List
 
 
 @njit
@@ -259,3 +260,73 @@ def countTrueFalse(a, b, index):
         countFalse += f
 
     return countTrue / (countFalse + 1e-6)
+
+
+@njit
+def calculate_formula(formula, operand):
+    temp_0 = np.zeros(operand.shape[1])
+    temp_1 = temp_0.copy()
+    temp_op = -1
+    for i in range(1, formula.shape[0], 2):
+        if formula[i] >= operand.shape[0]:
+            raise
+
+        if formula[i-1] < 2:
+            temp_op = formula[i-1]
+            temp_1 = operand[formula[i]].copy()
+        else:
+            if formula[i-1] == 2:
+                temp_1 *= operand[formula[i]]
+            else:
+                temp_1 /= operand[formula[i]]
+
+        if i+1 == formula.shape[0] or formula[i+1] < 2:
+            if temp_op == 0:
+                temp_0 += temp_1
+            else:
+                temp_0 -= temp_1
+
+    temp_0[np.isnan(temp_0)] = -1.7976931348623157e+308
+    temp_0[np.isinf(temp_0)] = -1.7976931348623157e+308
+    return temp_0
+
+
+@njit
+def check_similar(ct1, ct2, OPERAND, INDEX, target):
+    w1 = calculate_formula(ct1, OPERAND)
+    w2 = calculate_formula(ct2, OPERAND)
+    y = 0.0
+    x = 0.0
+
+    for i in range(INDEX.shape[0] - 1):
+        a1 = np.argsort(np.argsort(w1[INDEX[i]: INDEX[i+1]]))
+        a2 = np.argsort(np.argsort(w2[INDEX[i]: INDEX[i+1]]))
+        a1 = (a1 + 1) / (len(a1))
+        a2 = (a2 + 1) / (len(a2))
+
+        y += 1 / len(a1) * np.corrcoef(a1, a2)[0, 1]
+        x += 1 / len(a1)
+
+    corrcoef = y / x
+    if corrcoef <= target:
+        return False
+
+    return True
+
+
+@njit
+def correlation_filter(list_ct, OPERAND, INDEX, target, num_CT):
+    list_index = List([0])
+    for i in range(len(list_ct)):
+        check = True
+        for j in list_index:
+            if check_similar(list_ct[j], list_ct[i], OPERAND, INDEX, target):
+                check = False
+                break
+
+        if check:
+            list_index.append(i)
+            if len(list_index) == num_CT:
+                break
+
+    return list_index
