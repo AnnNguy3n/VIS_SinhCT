@@ -1,6 +1,5 @@
 import numpy as np
 from numba import njit
-from numba.typed import List
 
 
 @njit
@@ -330,6 +329,7 @@ def correlation_filter(list_ct, OPERAND, INDEX, target, num_CT):
         if check:
             list_index.append(i)
             if len(list_index) == num_CT:
+                print(i)
                 break
 
     return list_index
