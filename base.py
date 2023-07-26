@@ -5,7 +5,6 @@ import func
 from datetime import datetime
 import copy
 import warnings
-from numba.typed import List
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -101,11 +100,13 @@ class Base:
         return arrF
 
     def correlation_filter(self, df_CT, max_coef, n=100):
-        list_ct = []
-        for ct in df_CT.formula:
-            list_ct.append(self.convert_strF_to_arrF(ct))
+        try:
+            self.__list_CT
+        except:
+            self.__list_CT = []
+            for ct in df_CT.formula:
+                self.__list_CT.append(self.convert_strF_to_arrF(ct))
 
-        list_ct = List(list_ct)
-        list_index = func.correlation_filter(list_ct, self.OPERAND, self.INDEX, max_coef, n)
+        list_index = func.correlation_filter(self.__list_CT, self.OPERAND, self.INDEX, max_coef, n)
 
         return df_CT.iloc[list_index].reset_index(drop=True)

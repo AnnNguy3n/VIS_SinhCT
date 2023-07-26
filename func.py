@@ -316,8 +316,11 @@ def check_similar(ct1, ct2, OPERAND, INDEX, target):
 
 @njit
 def correlation_filter(list_ct, OPERAND, INDEX, target, num_CT):
-    list_index = List([0])
+    list_index = [0]
     for i in range(len(list_ct)):
+        if i % 1000 == 0:
+            print(i)
+
         check = True
         for j in list_index:
             if check_similar(list_ct[j], list_ct[i], OPERAND, INDEX, target):
