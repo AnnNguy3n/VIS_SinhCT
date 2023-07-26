@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+from numba.typed import List
 
 
 @njit
@@ -291,9 +292,7 @@ def calculate_formula(formula, operand):
 
 
 @njit
-def check_similar(ct1, ct2, OPERAND, INDEX, target):
-    w1 = calculate_formula(ct1, OPERAND)
-    w2 = calculate_formula(ct2, OPERAND)
+def check_similar(INDEX, target, w1, w2):
     y = 0.0
     x = 0.0
 
@@ -315,20 +314,22 @@ def check_similar(ct1, ct2, OPERAND, INDEX, target):
 
 @njit
 def correlation_filter(list_ct, OPERAND, INDEX, target, num_CT):
-    list_index = [0]
+    list_index = List([0])
+    list_weight = List([calculate_formula(list_ct[0], OPERAND)])
+    count = 1
     for i in range(len(list_ct)):
-        if i % 1000 == 0:
-            print(i)
-
         check = True
-        for j in list_index:
-            if check_similar(list_ct[j], list_ct[i], OPERAND, INDEX, target):
+        weight = calculate_formula(list_ct[i], OPERAND)
+        for w_j in list_weight:
+            if check_similar(INDEX, target, weight, w_j):
                 check = False
                 break
 
         if check:
             list_index.append(i)
-            if len(list_index) == num_CT:
+            list_weight.append(weight)
+            count += 1
+            if count == num_CT:
                 print(i)
                 break
 

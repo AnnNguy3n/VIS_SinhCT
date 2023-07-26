@@ -5,6 +5,7 @@ import func
 from datetime import datetime
 import copy
 import warnings
+from numba.typed import List
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -106,6 +107,8 @@ class Base:
             self.__list_CT = []
             for ct in df_CT.formula:
                 self.__list_CT.append(self.convert_strF_to_arrF(ct))
+            
+            self.__list_CT = List(self.__list_CT)
 
         list_index = func.correlation_filter(self.__list_CT, self.OPERAND, self.INDEX, max_coef, n)
 
