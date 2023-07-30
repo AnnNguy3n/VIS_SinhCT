@@ -107,9 +107,23 @@ class Base:
             self.__list_CT = []
             for ct in df_CT.formula:
                 self.__list_CT.append(self.convert_strF_to_arrF(ct))
-            
+
             self.__list_CT = List(self.__list_CT)
 
         list_index = func.correlation_filter(self.__list_CT, self.OPERAND, self.INDEX, max_coef, n)
+
+        return df_CT.iloc[list_index].reset_index(drop=True)
+
+    def similarity_filter(self, df_CT, n=100):
+        try:
+            self.__list_CT
+        except:
+            self.__list_CT = []
+            for ct in df_CT.formula:
+                self.__list_CT.append(self.convert_strF_to_arrF(ct))
+
+            self.__list_CT = List(self.__list_CT)
+
+        list_index = func.similarity_filter(self.__list_CT, n)
 
         return df_CT.iloc[list_index].reset_index(drop=True)

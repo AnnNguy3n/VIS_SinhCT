@@ -317,7 +317,7 @@ def correlation_filter(list_ct, OPERAND, INDEX, target, num_CT):
     list_index = List([0])
     list_weight = List([calculate_formula(list_ct[0], OPERAND)])
     count = 1
-    for i in range(len(list_ct)):
+    for i in range(1, len(list_ct)):
         check = True
         weight = calculate_formula(list_ct[i], OPERAND)
         for w_j in list_weight:
@@ -328,6 +328,50 @@ def correlation_filter(list_ct, OPERAND, INDEX, target, num_CT):
         if check:
             list_index.append(i)
             list_weight.append(weight)
+            count += 1
+            if count == num_CT:
+                print(i)
+                break
+
+    return list_index
+
+
+@njit
+def check_similar_2(f1_, f2_):
+    f1 = np.unique(f1_[1::2])
+    f2 = np.unique(f2_[1::2])
+
+    if len(f1) > len(f2):
+        F1 = f1
+        F2 = f2
+    else:
+        F1 = f2
+        F2 = f1
+
+    count = 0
+    for i in F1:
+        if i not in F2:
+            count += 1
+
+    if count >= 2:
+        return False
+
+    return True
+
+
+@njit
+def similarity_filter(list_ct, num_CT):
+    list_index = [0]
+    count = 1
+    for i in range(1, len(list_ct)):
+        check = True
+        for j in list_index:
+            if check_similar_2(list_ct[i], list_ct[j]):
+                check = False
+                break
+
+        if check:
+            list_index.append(i)
             count += 1
             if count == num_CT:
                 print(i)
